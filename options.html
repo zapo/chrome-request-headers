@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="http://knockoutjs.com/downloads/knockout-3.4.0.js"></script>
+  </head>
+  <body style="padding: 0">
+    <table>
+      <thead>
+        <tr>
+          <th>Header</th>
+          <th>Match</th>
+          <th>Replace</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody data-bind="foreach: rules">
+        <tr>
+          <td><input type="text" data-bind="value: header"/></td>
+          <td><input type="text" data-bind="value: match"/></td>
+          <td><input type="text" data-bind="value: replace"/></td>
+          <td><button data-bind="click: function() { $parent.rules.remove($data) }">X</button></td>
+        </tr>
+      </tbody>
+      <tfoot data-bind="with: candidate">
+        <tr>
+          <td><input type="text" data-bind="value: header"/></td>
+          <td><input type="text" data-bind="value: match"/></td>
+          <td><input type="text" data-bind="value: replace"/></td>
+          <td><button data-bind="click: function() { $parent.addRule() }">Add</button></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <script type="text/javascript">
+      vm = {
+        rules: ko.observableArray(),
+        candidate: {
+          header: ko.observable(''),
+          match: ko.observable(''),
+          replace: ko.observable('')
+        },
+
+        addRule() {
+          this.rules.push(ko.toJS(this.candidate))
+
+          this.candidate.header('')
+          this.candidate.match('')
+          this.candidate.replace('')
+        }
+      }
+
+      ko.computed(function() { return ko.toJS(vm.rules) }).subscribe(function(rules) {
+        window.parent.postMessage(rules, '*')
+      })
+
+      window.addEventListener('message', function(event) {
+        if (event.data) { vm.rules(event.data) }
+      })
+
+      ko.applyBindings(vm)
+    </script>
+  </body>
+</html>
